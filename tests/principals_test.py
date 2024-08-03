@@ -18,10 +18,15 @@ def test_grade_assignment_draft_assignment(client, h_principal):
     """
     failure case: If an assignment is in Draft state, it cannot be graded by principal
     """
+    # Create an assignment with a draft state
+    assignment = Assignment(content='Test assignment', state=AssignmentStateEnum.DRAFT)
+    db.session.add(assignment)
+    db.session.commit()
+
     response = client.post(
         '/principal/assignments/grade',
         json={
-            'id': 5,
+            'id': assignment.id,
             'grade': GradeEnum.A.value
         },
         headers=h_principal
@@ -29,12 +34,16 @@ def test_grade_assignment_draft_assignment(client, h_principal):
 
     assert response.status_code == 400
 
-
 def test_grade_assignment(client, h_principal):
+    # Create an assignment with a submitted state
+    assignment = Assignment(content='Test assignment', state=AssignmentStateEnum.SUBMITTED)
+    db.session.add(assignment)
+    db.session.commit()
+
     response = client.post(
         '/principal/assignments/grade',
         json={
-            'id': 4,
+            'id': assignment.id,
             'grade': GradeEnum.C.value
         },
         headers=h_principal
@@ -50,7 +59,7 @@ def test_regrade_assignment(client, h_principal):
     response = client.post(
         '/principal/assignments/grade',
         json={
-            'id': 4,
+            'id': assignment.id,
             'grade': GradeEnum.B.value
         },
         headers=h_principal
