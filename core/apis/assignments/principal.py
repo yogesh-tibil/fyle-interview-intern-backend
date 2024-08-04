@@ -1,11 +1,16 @@
 # principal.py
 
 from flask import Blueprint
-from yourapp.decorators import authenticate_principal
-from yourapp.models import Assignment, AssignmentSchema
-from yourapp.responses import APIResponse
+from core.apis.decorators import authenticate_principal, accept_payload
+from.schema import AssignmentSchema, TeacherSchema
+from core.models.assignments import Assignment
+from core.models.teachers import Teacher
+from core.apis.responses import APIResponse
+from flask_sqlalchemy import SQLAlchemy
 
+db = SQLAlchemy()
 principal_resources = Blueprint('principal_resources', __name__)
+
 
 @principal_resources.route('/assignments', methods=['GET'], strict_slashes=False)
 @authenticate_principal
@@ -17,9 +22,10 @@ def list_assignments(principal: dict) -> APIResponse:
         return APIResponse.respond(data=assignments_dump)
     except Exception as e:
         return APIResponse.error(message=str(e), status_code=500)
-        
+
+
 @principal_resources.route('/teachers', methods=['GET'], strict_slashes=False)
-@decorators.authenticate_principal
+@authenticate_principal
 def list_teachers(principal: dict) -> APIResponse:
     """Returns list of teachers"""
     try:
@@ -29,9 +35,10 @@ def list_teachers(principal: dict) -> APIResponse:
     except Exception as e:
         return APIResponse.error(message=str(e), status_code=500)
 
+
 @principal_resources.route('/assignments/grade', methods=['POST'], strict_slashes=False)
-@decorators.accept_payload
-@decorators.authenticate_principal
+@accept_payload
+@authenticate_principal
 def grade_assignment(principal: dict, incoming_payload: dict) -> APIResponse:
     """Grade or re-grade an assignment"""
     try:
